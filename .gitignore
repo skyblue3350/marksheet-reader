@@ -1,0 +1,6 @@
+.venv*
+__pycache__
+input/
+output/
+
+result.csv
