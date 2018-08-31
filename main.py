@@ -106,8 +106,12 @@ class Utils(object):
         result = []
         for c in contrours:
             mu = cv2.moments(c)
-            x, y= int(mu["m10"] / mu["m00"]) , int(mu["m01"] / mu["m00"])
-            result.append((x, y))
+            try:
+                x, y= int(mu["m10"] / mu["m00"]) , int(mu["m01"] / mu["m00"])
+            except ZeroDivisionError:
+                pass
+            else:
+                result.append((x, y))
 
         result.sort(key=lambda x: x[axis])
 
