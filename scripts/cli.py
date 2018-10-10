@@ -20,13 +20,15 @@ def open_dir(path):
 
 
 class MarkSheetResult(object):
-    def __init__(self, path, number, question, score):
-        self.path = path
-        self.number = number
-        self.question = question
-        self.score = score
+    def __init__(self, **kargs):
+        self.path = kargs.get("path")
+        self.number = kargs.get("number")
+        self.question = kargs.get("question")
+        self.score = kargs.get("score")
+        self.x = kargs.get("x")
+        self.y = kargs.get("y")
 
-    def __repr__(self):
+    def __str__(self):
         return "{} student: {} score: {}".format(self.__class__.__name__, self.number, self.score)
 
 
@@ -156,7 +158,14 @@ class MarkSheetReader(object):
                     if np.allclose(q, self.answer[i]):
                         score += 1
 
-                yield MarkSheetResult(p, number, question, score)
+                yield MarkSheetResult(
+                    path=p,
+                    number=number,
+                    question=question,
+                    score=score,
+                    x=x,
+                    y=y,
+                )
 
         raise StopIteration
 
