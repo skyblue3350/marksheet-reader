@@ -173,7 +173,8 @@ class MarkSheetReader(object):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="CLI Mode Marksheet parser")
     parser.add_argument("-i", "--input", type=open_dir, required=True, help="input directory")
-    parser.add_argument("-o", "--output", type=argparse.FileType("w"), required=True, help="output file")
+    parser.add_argument("-o", "--output", type=open_dir, required=True, help="output directory")
+    parser.add_argument("-r", "--result", type=argparse.FileType("w"), required=True, help="result file")
     parser.add_argument("-t", "--thresh", type=int, required=False, default=240, help="threshold value")
     parser.add_argument("-e", "--ext", type=str, required=False, default=["jpg", "png", "gif"], nargs="+",
                         help="target file extension")
@@ -192,6 +193,6 @@ if __name__ == "__main__":
             "score": sheet.score,
         })
 
-    writer = csv.DictWriter(args.output, lineterminator="\n", fieldnames=result[0].keys())
+    writer = csv.DictWriter(args.result, lineterminator="\n", fieldnames=result[0].keys())
     writer.writeheader()
     writer.writerows(result)
