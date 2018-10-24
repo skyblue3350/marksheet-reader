@@ -27,6 +27,7 @@ class MarkSheetResult(object):
         self.score = kargs.get("score")
         self.x = kargs.get("x")
         self.y = kargs.get("y")
+        self.image = kargs.get("image")
 
     def __str__(self):
         return "{} student: {} score: {}".format(self.__class__.__name__, self.number, self.score)
@@ -165,6 +166,7 @@ class MarkSheetReader(object):
                     score=score,
                     x=x,
                     y=y,
+                    image=parser.image
                 )
 
         raise StopIteration
@@ -181,6 +183,11 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--answer", type=argparse.FileType("r"), required=True, help="answer csv file")
     parser.add_argument("-c", "--config", type=argparse.FileType("r"), required=False, help="config file path TBD")
 
+    # TODO: argparse
+    POSITION_MARKER = (255, 0, 0)
+    POSITION_MARKER_LINE = (0, 0, 255)
+    ANSWER_MARKER = (0, 255, 0)
+
     args = parser.parse_args()
 
     reader = MarkSheetReader(args)
@@ -192,6 +199,47 @@ if __name__ == "__main__":
             "number": sheet.number,
             "score": sheet.score,
         })
+
+        h, w = sheet.image.shape
+        image = np.array(Image.open(sheet.path.open("rb")))
+        # 結果書き込み
+
+        # TODO: fix
+        for x in sheet.x[:7]:
+            for number, y in enumerate(sheet.y[:10]):
+                if sheet.image[y[1]][x[0]]:
+                    radius = int(w * 0.01)
+                    border = int(radius / 3)
+                    cv2.circle(image, (x[0], y[1]), radius, POSITION_MARKER, border)
+                    cv2.putText(
+                        image,
+                        str(number),
+                        (x[0] - int(radius/2), y[1] + int(radius/2)),
+                        cv2.FONT_HERSHEY_COMPLEX,
+                        fontScale=int(border / 5),
+                        color=POSITION_MARKER,
+                        thickness=border)
+                    break
+
+        for i, v in enumerate(list(zip(*[iter(sheet.x[7:])]*10))):
+            for y in sheet.y:
+                # 交点位置を参照して色が塗られてるかチェック
+                for number, x in enumerate(v):
+                    # マークされていたら1
+                    if sheet.image[y[1]][x[0]]:
+                        cv2.circle(image, (x[0], y[1]), radius, POSITION_MARKER, border)
+                        cv2.putText(
+                            image,
+                            str(number + 1),
+                            (x[0] - int(radius/2), y[1] + int(radius/2)),
+                            cv2.FONT_HERSHEY_COMPLEX,
+                            fontScale=int(border / 5),
+                            color=POSITION_MARKER,
+                            thickness=border)
+
+        # 書き出し
+        output = args.output / sheet.path.name
+        Image.fromarray(image).save(output)
 
     writer = csv.DictWriter(args.result, lineterminator="\n", fieldnames=result[0].keys())
     writer.writeheader()
