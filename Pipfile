@@ -12,6 +12,3 @@ opencv-python = "==3.4.2.17"
 pillow = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.6"
